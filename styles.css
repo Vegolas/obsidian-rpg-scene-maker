@@ -1,0 +1,235 @@
+/* Inline scene/event/sound trigger chips. Uses Obsidian theme variables so it fits light/dark
+   and whatever theme the user runs. */
+
+.sm-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.05em 0.5em;
+  margin: 0 0.1em;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-secondary);
+  color: var(--text-normal);
+  font-size: 0.9em;
+  line-height: 1.5;
+  text-decoration: none;
+  vertical-align: baseline;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.sm-chip:hover {
+  /* background-color (longhand), NOT the `background` shorthand — the shorthand resets
+     background-size/position, which would make a banner's art jump on hover. */
+  background-color: var(--background-modifier-hover);
+  border-color: var(--interactive-accent);
+}
+
+.sm-chip:active {
+  transform: translateY(1px);
+}
+
+.sm-chip:focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 1px;
+}
+
+.sm-chip-icon {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.sm-chip-art {
+  width: 1.3em;
+  height: 1.3em;
+  border-radius: 3px;
+  object-fit: cover;
+  display: block;
+}
+
+.sm-chip-label {
+  font-weight: 600;
+}
+
+/* Unknown id (not found in the server list): flag it so a typo is obvious. */
+.sm-chip-missing {
+  border-style: dashed;
+  opacity: 0.75;
+}
+
+/* Banner render mode (global setting): full-width, larger, art as background. */
+.sm-chip--banner {
+  display: flex;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 64px;
+  margin: 0.5em 0;
+  padding: 0.75em 1em;
+  gap: 0.6em;
+  border-radius: 10px;
+  background-size: cover;
+  background-position: center;
+}
+
+.sm-chip--banner .sm-chip-icon {
+  font-size: 1.5em;
+}
+
+.sm-chip--banner .sm-chip-label {
+  font-size: 1.2em;
+  font-weight: 700;
+}
+
+.sm-chip--banner .sm-chip-art {
+  width: 2.2em;
+  height: 2.2em;
+  border-radius: 6px;
+}
+
+/* When the banner carries art it becomes light-on-dark for legibility over the image. */
+.sm-chip--banner.sm-has-art {
+  color: #fff;
+  border-color: transparent;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+/* Banner hover feedback that doesn't touch background geometry (so the art stays put). */
+.sm-chip--banner:hover {
+  filter: brightness(1.08);
+}
+
+/* Live indicator: a pulsing dot + accent ring while the scene/event/sound is active. */
+.sm-chip.is-active {
+  border-color: var(--interactive-accent);
+  box-shadow: inset 0 0 0 1px var(--interactive-accent);
+}
+
+.sm-chip.is-active::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 0.5em;
+  height: 0.5em;
+  border-radius: 50%;
+  background: var(--color-green, #2ecf7a);
+  box-shadow: 0 0 6px var(--color-green, #2ecf7a);
+  animation: sm-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes sm-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sm-chip.is-active::before {
+    animation: none;
+  }
+}
+
+/* Embedded control-panel pane. */
+/* Layout is also set inline in panelview.ts (belt-and-suspenders so the pane fills even against a
+   stale styles.css). Keep these in sync with those inline styles. */
+.sm-panel-view {
+  position: relative;
+  height: 100%;
+  padding: 0;
+  overflow: hidden;
+}
+
+.sm-panel-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 34px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.sm-panel-title {
+  font-weight: 600;
+  font-size: 0.85em;
+  color: var(--text-muted);
+}
+
+.sm-panel-spacer {
+  flex: 1;
+}
+
+.sm-panel-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.sm-panel-btn:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.sm-panel-frame {
+  position: absolute;
+  top: 34px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* <webview>/<iframe> are replaced elements: a percentage height that can't resolve falls back
+   to their 150px intrinsic default. Fill the (flex-sized) frame by positioning absolutely. */
+.sm-panel-embed {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.sm-panel-empty {
+  padding: 1.5em;
+  color: var(--text-muted);
+}
+
+/* Autocomplete suggestion rows. */
+.sm-suggestion {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.sm-suggestion-art {
+  width: 2em;
+  height: 2em;
+  border-radius: 4px;
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+
+.sm-suggestion-name {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5em;
+}
+
+.sm-suggestion-id {
+  color: var(--text-muted);
+  font-size: 0.8em;
+}

@@ -1,0 +1,19 @@
+{
+  "name": "rpg-scene-maker-obsidian",
+  "version": "0.1.0",
+  "description": "Trigger RPG Scene Maker scenes/events/sounds from Obsidian notes.",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "builtin-modules": "^3.3.0",
+    "esbuild": "^0.21.0",
+    "obsidian": "^1.5.7",
+    "typescript": "^5.4.0"
+  }
+}
