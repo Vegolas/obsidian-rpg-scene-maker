@@ -1,20 +1,3 @@
-# =============================================================================
-# TEMPLATE — do NOT leave this file here in the dedicated plugin repo.
-# Move it to  .github/workflows/release.yml  in the standalone Obsidian repo
-# (this monorepo builds via the .NET CI in .github/workflows/build.yml, so the
-# file is kept here only as a ready-to-carry template, with the .template
-# suffix so GitHub Actions never runs it from the monorepo).
-#
-# What it does: on pushing a version tag (e.g. 0.1.0), it builds the plugin and
-# publishes a GitHub release whose assets are main.js, manifest.json, styles.css
-# — exactly the three files Obsidian downloads when a user installs the plugin.
-#
-# Obsidian requirement: the git tag MUST equal manifest.json "version" EXACTLY,
-# with NO leading "v" (tag `0.1.0`, never `v0.1.0`). The `on.push.tags` filter
-# below only matches bare numeric N.N.N tags, so a stray v-prefixed tag won't
-# trigger a release.
-# =============================================================================
-
 name: Release Obsidian plugin
 
 on:
