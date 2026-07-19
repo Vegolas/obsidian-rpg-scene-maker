@@ -1,6 +1,6 @@
 import { Extension, RangeSetBuilder } from "@codemirror/state";
 import { Decoration, DecorationSet, EditorView, ViewPlugin, ViewUpdate, WidgetType } from "@codemirror/view";
-import type SceneMakerPlugin from "./main";
+import type AmbientDirectorPlugin from "./main";
 import { buildChip } from "./chip";
 import { SmToken, parseToken } from "./tokens";
 
@@ -9,7 +9,7 @@ const TOKEN_RE = /`(sm:(?:scene|event|sound|music|lights)(?::[^`\n]*)?)`/g;
 
 class ChipWidget extends WidgetType {
   constructor(
-    private plugin: SceneMakerPlugin,
+    private plugin: AmbientDirectorPlugin,
     private raw: string,
     private token: SmToken,
   ) {
@@ -34,7 +34,7 @@ class ChipWidget extends WidgetType {
  * the caret/selection sits inside a token (so it stays editable as plain text). Reading view is
  * handled separately by the markdown post-processor in main.ts.
  */
-export function livePreviewExtension(plugin: SceneMakerPlugin): Extension {
+export function livePreviewExtension(plugin: AmbientDirectorPlugin): Extension {
   return ViewPlugin.fromClass(
     class {
       decorations: DecorationSet;
@@ -53,7 +53,7 @@ export function livePreviewExtension(plugin: SceneMakerPlugin): Extension {
   );
 }
 
-function build(plugin: SceneMakerPlugin, view: EditorView): DecorationSet {
+function build(plugin: AmbientDirectorPlugin, view: EditorView): DecorationSet {
   const builder = new RangeSetBuilder<Decoration>();
   const sel = view.state.selection.main;
   try {
@@ -73,7 +73,7 @@ function build(plugin: SceneMakerPlugin, view: EditorView): DecorationSet {
     }
   } catch (e) {
     // A decoration failure must never break the editor; fall back to plain text.
-    console.error("RPG Scene Maker: live-preview decoration failed", e);
+    console.error("Ambient Director: live-preview decoration failed", e);
   }
   return builder.finish();
 }

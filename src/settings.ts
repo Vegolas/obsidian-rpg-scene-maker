@@ -1,10 +1,10 @@
 import { App, Notice, PluginSettingTab, Setting } from "obsidian";
-import type SceneMakerPlugin from "./main";
+import type AmbientDirectorPlugin from "./main";
 
 export type RenderStyle = "chip" | "banner";
 
-export interface SceneMakerSettings {
-  /** Base URL of the RPG Scene Maker API, e.g. http://192.168.1.20:5252 */
+export interface AmbientDirectorSettings {
+  /** Base URL of the Ambient Director API, e.g. http://192.168.1.20:5252 */
   baseUrl: string;
   /** Optional API key (only when Security:ApiKey is set on the server). */
   apiKey: string;
@@ -16,7 +16,7 @@ export interface SceneMakerSettings {
   highlightActive: boolean;
 }
 
-export const DEFAULT_SETTINGS: SceneMakerSettings = {
+export const DEFAULT_SETTINGS: AmbientDirectorSettings = {
   baseUrl: "http://localhost:5252",
   apiKey: "",
   showThumbnails: true,
@@ -24,10 +24,10 @@ export const DEFAULT_SETTINGS: SceneMakerSettings = {
   highlightActive: true,
 };
 
-export class SceneMakerSettingTab extends PluginSettingTab {
+export class AmbientDirectorSettingTab extends PluginSettingTab {
   constructor(
     app: App,
-    private plugin: SceneMakerPlugin,
+    private plugin: AmbientDirectorPlugin,
   ) {
     super(app, plugin);
   }
@@ -38,7 +38,7 @@ export class SceneMakerSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Server address")
-      .setDesc("Base URL of the RPG Scene Maker API on your LAN, e.g. http://192.168.1.20:5252")
+      .setDesc("Base URL of the Ambient Director API on your LAN, e.g. http://192.168.1.20:5252")
       .addText((t) =>
         t
           .setPlaceholder("http://localhost:5252")
@@ -107,8 +107,8 @@ export class SceneMakerSettingTab extends PluginSettingTab {
         b.setButtonText("Test").onClick(async () => {
           this.plugin.api.clearCache();
           const scenes = await this.plugin.api.list("scene", true);
-          if (scenes.length > 0) new Notice(`RPG Scene Maker: connected — ${scenes.length} scene(s) found.`);
-          else new Notice("RPG Scene Maker: no scenes returned. Check the address/key and that the server is running.");
+          if (scenes.length > 0) new Notice(`Ambient Director: connected — ${scenes.length} scene(s) found.`);
+          else new Notice("Ambient Director: no scenes returned. Check the address/key and that the server is running.");
         }),
       );
   }

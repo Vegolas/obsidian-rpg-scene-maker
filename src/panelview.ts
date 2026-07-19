@@ -1,7 +1,7 @@
 import { ItemView, WorkspaceLeaf, setIcon } from "obsidian";
-import type SceneMakerPlugin from "./main";
+import type AmbientDirectorPlugin from "./main";
 
-export const PANEL_VIEW_TYPE = "rpg-scene-maker-panel";
+export const PANEL_VIEW_TYPE = "ambient-director-panel";
 
 /** Height of the little toolbar above the embedded panel, in px. */
 const BAR_HEIGHT = 34;
@@ -20,7 +20,7 @@ export class PanelView extends ItemView {
 
   constructor(
     leaf: WorkspaceLeaf,
-    private plugin: SceneMakerPlugin,
+    private plugin: AmbientDirectorPlugin,
   ) {
     super(leaf);
   }
@@ -30,7 +30,7 @@ export class PanelView extends ItemView {
   }
 
   getDisplayText(): string {
-    return "RPG Scene Maker";
+    return "Ambient Director";
   }
 
   getIcon(): string {
@@ -57,7 +57,7 @@ export class PanelView extends ItemView {
     if (!base) {
       root.createDiv({
         cls: "sm-panel-empty",
-        text: "Set the server address in RPG Scene Maker settings, then reopen this panel.",
+        text: "Set the server address in Ambient Director settings, then reopen this panel.",
       });
       return;
     }

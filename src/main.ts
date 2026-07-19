@@ -1,28 +1,35 @@
 import { MarkdownPostProcessorContext, Notice, Plugin } from "obsidian";
-import { SceneMakerApi } from "./api";
+import { AmbientDirectorApi } from "./api";
 import { buildChip } from "./chip";
 import { livePreviewExtension } from "./livepreview";
-import { SceneMakerSuggest } from "./suggest";
+import { AmbientDirectorSuggest } from "./suggest";
 import { PANEL_VIEW_TYPE, PanelView } from "./panelview";
-import { DEFAULT_SETTINGS, SceneMakerSettingTab, SceneMakerSettings } from "./settings";
+import { DEFAULT_SETTINGS, AmbientDirectorSettingTab, AmbientDirectorSettings } from "./settings";
 import { StateTracker } from "./tracker";
 import { SmToken, parseToken, pathFor } from "./tokens";
 
 /** How often to poll the server for live active state (ms), while chips are on screen. */
 const POLL_INTERVAL_MS = 4000;
 
-export default class SceneMakerPlugin extends Plugin {
-  settings!: SceneMakerSettings;
-  api!: SceneMakerApi;
+export default class AmbientDirectorPlugin extends Plugin {
+  settings!: AmbientDirectorSettings;
+  api!: AmbientDirectorApi;
   tracker!: StateTracker;
 
-  async onload(): Promise<void> {
+  // Component.onload is typed void (through Obsidian 1.5.x), so the async part runs fire-and-forget;
+  // every registration below is Component-tracked, so an unload during the (one disk read) settings
+  // load still cleans up correctly.
+  onload(): void {
+    void this.initialize();
+  }
+
+  private async initialize(): Promise<void> {
     await this.loadSettings();
-    this.api = new SceneMakerApi(() => ({ baseUrl: this.settings.baseUrl, apiKey: this.settings.apiKey }));
+    this.api = new AmbientDirectorApi(() => ({ baseUrl: this.settings.baseUrl, apiKey: this.settings.apiKey }));
     this.tracker = new StateTracker(this);
     this.registerInterval(window.setInterval(() => void this.tracker.tick(), POLL_INTERVAL_MS));
 
-    this.addSettingTab(new SceneMakerSettingTab(this.app, this));
+    this.addSettingTab(new AmbientDirectorSettingTab(this.app, this));
 
     // Reading view: turn inline `sm:...` code spans into chips.
     this.registerMarkdownPostProcessor((el, ctx) => this.renderReadingChips(el, ctx));
@@ -31,11 +38,11 @@ export default class SceneMakerPlugin extends Plugin {
     this.registerEditorExtension(livePreviewExtension(this));
 
     // Authoring: autocomplete kinds and existing scene/event/sound ids.
-    this.registerEditorSuggest(new SceneMakerSuggest(this.app, this));
+    this.registerEditorSuggest(new AmbientDirectorSuggest(this.app, this));
 
     // Control panel embedded in an Obsidian pane (drive scenes from the notes window).
     this.registerView(PANEL_VIEW_TYPE, (leaf) => new PanelView(leaf, this));
-    this.addRibbonIcon("dice-6", "Open RPG Scene Maker panel", () => void this.activatePanel());
+    this.addRibbonIcon("dice-6", "Open Ambient Director panel", () => void this.activatePanel());
     this.addCommand({
       id: "open-panel",
       name: "Open control panel",
@@ -47,7 +54,7 @@ export default class SceneMakerPlugin extends Plugin {
       name: "Refresh scene / event / sound lists",
       callback: () => {
         this.api.clearCache();
-        new Notice("RPG Scene Maker: lists refreshed.");
+        new Notice("Ambient Director: lists refreshed.");
       },
     });
   }
@@ -89,7 +96,8 @@ export default class SceneMakerPlugin extends Plugin {
   }
 
   async loadSettings(): Promise<void> {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    const stored = (await this.loadData()) as Partial<AmbientDirectorSettings> | null;
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, stored);
   }
 
   async saveSettings(): Promise<void> {

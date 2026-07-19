@@ -1,7 +1,7 @@
 {
-  "name": "rpg-scene-maker-obsidian",
-  "version": "0.1.1",
-  "description": "Trigger RPG Scene Maker scenes/events/sounds from Obsidian notes.",
+  "name": "ambient-director-obsidian",
+  "version": "0.1.0",
+  "description": "Trigger Ambient Director scenes/events/sounds from Obsidian notes.",
   "main": "main.js",
   "private": true,
   "scripts": {

@@ -1,4 +1,4 @@
-import type SceneMakerPlugin from "./main";
+import type AmbientDirectorPlugin from "./main";
 import { DEFAULT_ICON, ListKindOf, SmToken, lightsLabel, splitName } from "./tokens";
 
 /**
@@ -7,12 +7,12 @@ import { DEFAULT_ICON, ListKindOf, SmToken, lightsLabel, splitName } from "./tok
  * and — when enabled — its tile art. Style (compact chip vs full-width banner) comes from
  * the global setting, and scene/event/sound chips register for live active-state highlighting.
  */
-export function buildChip(plugin: SceneMakerPlugin, token: SmToken): HTMLElement {
+export function buildChip(plugin: AmbientDirectorPlugin, token: SmToken): HTMLElement {
   const banner = plugin.settings.render === "banner";
   const el = createEl("a", { cls: ["sm-chip", `sm-chip-${token.kind}`] });
   if (banner) el.addClass("sm-chip--banner");
   el.setAttribute("role", "button");
-  el.setAttribute("aria-label", `RPG Scene Maker: ${token.kind} ${token.arg}`.trim());
+  el.setAttribute("aria-label", `Ambient Director: ${token.kind} ${token.arg}`.trim());
   el.tabIndex = 0;
 
   const icon = el.createSpan({ cls: "sm-chip-icon", text: DEFAULT_ICON[token.kind] });
@@ -38,7 +38,7 @@ export function buildChip(plugin: SceneMakerPlugin, token: SmToken): HTMLElement
 }
 
 async function enhance(
-  plugin: SceneMakerPlugin,
+  plugin: AmbientDirectorPlugin,
   token: SmToken,
   chip: HTMLElement,
   icon: HTMLElement,
@@ -61,7 +61,7 @@ async function enhance(
   const found = items.find((i) => i.id.toLowerCase() === token.arg.toLowerCase());
   if (!found) {
     chip.addClass("sm-chip-missing");
-    chip.setAttribute("aria-label", `RPG Scene Maker: unknown ${token.kind} "${token.arg}"`);
+    chip.setAttribute("aria-label", `Ambient Director: unknown ${token.kind} "${token.arg}"`);
     return;
   }
 

@@ -1,4 +1,4 @@
-# Submitting RPG Scene Maker to the Obsidian community plugin directory
+# Submitting Ambient Director to the Obsidian community plugin directory
 
 This is the owner's manual checklist for getting this plugin into Obsidian's community
 directory. Everything here is a **human step** — the accompanying PR only *prepares* the plugin
@@ -26,8 +26,8 @@ submission.
 
 | Field | Value |
 | --- | --- |
-| `id` | `rpg-scene-maker` — **unique**, not present in `community-plugins.json` (checked against all 5,802 entries; nearest is `rpg-manager`/`RPG Manager`, distinct) |
-| `name` | `RPG Scene Maker` — unique, no `obsidian`, doesn't end in `plugin` |
+| `id` | `ambient-director` — **unique**, not present in `community-plugins.json` (checked against all 5,802 entries; nearest is `rpg-manager`/`RPG Manager`, distinct) |
+| `name` | `Ambient Director` — unique, no `obsidian`, doesn't end in `plugin` |
 | `version` | `0.1.0` |
 | `minAppVersion` | `1.4.0` |
 | `author` | `Vegolas` |
@@ -40,9 +40,9 @@ submission.
 Obsidian requires a **dedicated public repo per plugin**, with `manifest.json` at the repo **root**.
 Use `git subtree split` so the plugin keeps its own commit history.
 
-Suggested repo name: **`obsidian-rpg-scene-maker`** (the `obsidian-` prefix is the usual convention for
+Suggested repo name: **`obsidian-ambient-director`** (the `obsidian-` prefix is the usual convention for
 the standalone repo — it's allowed in the *repo* name; only the `id` and `name` may not contain
-"obsidian"). Full slug: `Vegolas/obsidian-rpg-scene-maker`.
+"obsidian"). Full slug: `Vegolas/obsidian-ambient-director`.
 
 ```bash
 # From the monorepo root, on an up-to-date main:
@@ -52,21 +52,27 @@ git checkout main && git pull
 git subtree split --prefix=integrations/obsidian -b obsidian-split
 
 # 2) Create the empty public repo (no auto-init README/licence/gitignore — avoids a merge conflict).
-gh repo create Vegolas/obsidian-rpg-scene-maker --public \
-  --description "Trigger RPG Scene Maker scenes, events and sounds from your Obsidian notes."
+gh repo create Vegolas/obsidian-ambient-director --public \
+  --description "Trigger Ambient Director scenes, events and sounds from your Obsidian notes."
 
 # 3) Push the split branch as the new repo's main.
-git push git@github.com:Vegolas/obsidian-rpg-scene-maker.git obsidian-split:main
+git push git@github.com:Vegolas/obsidian-ambient-director.git obsidian-split:main
 
 # 4) Tidy up locally.
 git branch -D obsidian-split
 ```
 
 After the split, in the new repo the plugin files sit at the root: `manifest.json`, `versions.json`,
-`package.json`, `styles.css`, `LICENSE`, `README.md`, `src/`, `esbuild.config.mjs`, `tsconfig.json`,
-`version-bump.mjs`, `.gitignore`.
+`package.json`, `package-lock.json`, `styles.css`, `LICENSE`, `README.md`, `src/`,
+`esbuild.config.mjs`, `tsconfig.json`, `version-bump.mjs`, `.gitignore`.
 
 Notes on what is / isn't in the new repo:
+- **`package-lock.json` MUST be committed** — the release workflow's `npm ci` refuses to run without a
+  lockfile (`EUSAGE: The npm ci command can only install with an existing package-lock.json`). It used
+  to be gitignored here, which made a split repo fail its first release; the ignore was removed and the
+  lockfile is tracked now. If your split predates that fix: delete the `package-lock.json` line from the
+  new repo's `.gitignore`, copy the lockfile from the monorepo, commit, then re-push the release tag
+  (`git push --delete origin 0.1.0 && git push origin 0.1.0` after re-tagging the new commit).
 - **`main.js` is not committed** — `.gitignore` (carried over) ignores it. Obsidian downloads it from
   the **release**, not the repo; the release workflow rebuilds it. (Same in this monorepo: `main.js`
   is gitignored and never committed here either.)
@@ -74,8 +80,8 @@ Notes on what is / isn't in the new repo:
 - **Wire up the release workflow** (it's shipped here as a `.template` so the monorepo's CI ignores it):
 
   ```bash
-  git clone git@github.com:Vegolas/obsidian-rpg-scene-maker.git
-  cd obsidian-rpg-scene-maker
+  git clone git@github.com:Vegolas/obsidian-ambient-director.git
+  cd obsidian-ambient-director
   mkdir -p .github/workflows
   git mv release-workflow.yml.template .github/workflows/release.yml
   # Delete the "TEMPLATE — move to ..." comment block at the top of the file.
@@ -86,11 +92,11 @@ Notes on what is / isn't in the new repo:
   workflow also sets `permissions: contents: write` at job level, but flip the repo setting too so
   `gh release create` can attach assets).
 - **Fix the README for the standalone repo** (it currently targets the monorepo):
-  - `[RPG Scene Maker](../../README.md)` → `https://github.com/Vegolas/rpg-scene-maker`
+  - `[Ambient Director](../../README.md)` → `https://github.com/Vegolas/ambient-director`
   - `[installed PWA](../../README.md#using-it-from-an-ipad-or-any-tabletphone)` →
-    `https://github.com/Vegolas/rpg-scene-maker#using-it-from-an-ipad-or-any-tabletphone`
+    `https://github.com/Vegolas/ambient-director#using-it-from-an-ipad-or-any-tabletphone`
   - Replace the "Install" section (currently "isn't in the community store — build and drop it in")
-    with "Install from **Settings → Community plugins → Browse → RPG Scene Maker**" once accepted;
+    with "Install from **Settings → Community plugins → Browse → Ambient Director**" once accepted;
     keep the manual build steps as a "from source" fallback.
 - **Enable Issues** on the new repo (Settings → General → Features → Issues) — the automated review
   errors if the repo has no issue tracker.
@@ -105,12 +111,12 @@ snapshot to the mirror when you want to cut a release.
 
 ```bash
 # Sync new plugin commits from the monorepo into the mirror:
-git subtree push --prefix=integrations/obsidian git@github.com:Vegolas/obsidian-rpg-scene-maker.git main
+git subtree push --prefix=integrations/obsidian git@github.com:Vegolas/obsidian-ambient-director.git main
 
 # If subtree push ever refuses to fast-forward (e.g. after a commit made directly in the mirror,
 # like the workflow move above), just re-split and force-push — the mirror is disposable:
 git subtree split --prefix=integrations/obsidian -b obsidian-split
-git push --force git@github.com:Vegolas/obsidian-rpg-scene-maker.git obsidian-split:main
+git push --force git@github.com:Vegolas/obsidian-ambient-director.git obsidian-split:main
 git branch -D obsidian-split
 ```
 
@@ -145,9 +151,9 @@ npm ci
 npm run build            # produces main.js
 ```
 
-Copy `main.js`, `manifest.json`, `styles.css` into `<vault>/.obsidian/plugins/rpg-scene-maker/`, then
-enable **RPG Scene Maker** under *Settings → Community plugins*. Point *Settings → RPG Scene Maker →
-Server address* at a running RPG Scene Maker server. Then exercise:
+Copy `main.js`, `manifest.json`, `styles.css` into `<vault>/.obsidian/plugins/ambient-director/`, then
+enable **Ambient Director** under *Settings → Community plugins*. Point *Settings → Ambient Director →
+Server address* at a running Ambient Director server. Then exercise:
 
 - **Reading view** — a note containing `` `sm:scene:<id>` ``, `` `sm:event:<id>` ``, `` `sm:sound:<id>` ``,
   `` `sm:music:<uri>` ``, `` `sm:lights:reset` `` renders each as a chip; clicking fires and shows a toast.
@@ -189,6 +195,16 @@ git push origin 0.1.0
 The workflow builds and creates a **draft** release with the three assets attached. Then **Releases →
 edit the draft → Publish** — the directory can only fetch assets from a *published* release.
 
+> **Trap — two releases on one tag (bit us on 2026-07-19):** if you hand-create a release in the GitHub
+> UI (or a workflow run fails and you retry), you can end up with BOTH an empty *published* release and
+> the workflow's asset-carrying *draft* on tag `0.1.0`. The Obsidian bot only sees published releases,
+> so it reports "release 0.1.0 is missing the main.js file" even though the draft has everything.
+> Fix: list them (`gh api repos/<owner>/<repo>/releases -q '.[] | "\(.id) draft=\(.draft)
+> assets=\(.assets|length)"'`), DELETE the empty published one by id (`gh api -X DELETE
+> repos/<owner>/<repo>/releases/<id>` — the git tag survives), then publish the draft
+> (`gh api -X PATCH repos/<owner>/<repo>/releases/<draft-id> -F draft=false -f tag_name=0.1.0`),
+> and re-request the review. Never fix it by committing `main.js` — the review rejects that.
+
 **Option B — by hand (no workflow):**
 
 ```bash
@@ -214,7 +230,7 @@ Per the current [Submit your plugin](https://docs.obsidian.md/Plugins/Releasing/
    account.
 2. **Link your GitHub account** to your profile.
 3. Sidebar → **Plugins** → **New plugin**.
-4. Enter the repo URL: `https://github.com/Vegolas/obsidian-rpg-scene-maker`.
+4. Enter the repo URL: `https://github.com/Vegolas/obsidian-ambient-director`.
 5. Review and **agree to the Developer policies**, and confirm you'll continue to support the plugin.
 6. **Submit.**
 
@@ -230,11 +246,11 @@ exactly:
 
 ```json
 {
-    "id": "rpg-scene-maker",
-    "name": "RPG Scene Maker",
+    "id": "ambient-director",
+    "name": "Ambient Director",
     "author": "Vegolas",
-    "description": "Trigger RPG Scene Maker scenes, events and sounds from your notes with inline buttons.",
-    "repo": "Vegolas/obsidian-rpg-scene-maker"
+    "description": "Trigger Ambient Director scenes, events and sounds from your notes with inline buttons.",
+    "repo": "Vegolas/obsidian-ambient-director"
 }
 ```
 
@@ -264,9 +280,9 @@ still maps to something the automated review checks — walk it before submittin
 available spec. Verified 2026-07-18.)
 
 - **`id`**: matches `^[a-z0-9-_]+$`, doesn't contain `obsidian`, doesn't end with `plugin`, is unique,
-  and isn't a previously-removed id. → `rpg-scene-maker` passes.
+  and isn't a previously-removed id. → `ambient-director` passes.
 - **`name`**: doesn't contain `obsidian`, doesn't end with `plugin`, doesn't start `Obsi` / end `dian`,
-  is unique. → `RPG Scene Maker` passes.
+  is unique. → `Ambient Director` passes.
 - **`description`**: ≤ 250 chars, ends with `.`/`?`/`!`/`)`, doesn't contain `obsidian`, avoids
   "this is a plugin"/"this plugin allows", no emoji. → passes.
 - **`manifest.json`** (fetched from the repo root): parseable; has all required keys; no *disallowed*
@@ -287,6 +303,11 @@ available spec. Verified 2026-07-18.)
 - Manual staff code-review is now optional/deferred (many plugins are admitted automatically and shown
   as "not manually reviewed by Obsidian staff"), so the automated checks above are the gate that
   matters for getting listed.
+- **One warning is skipped on purpose:** the reviewer suggests implementing `getSettingDefinitions()`
+  (declarative settings, searchable in Obsidian ≥1.13). Adopting it means *using a 1.13 API*, which
+  either re-triggers the "APIs newer than minAppVersion" **error** or forces `minAppVersion` up to
+  `1.13.0`, dropping older installs. Deliberately deferred: revisit in a later release once a 1.13+
+  floor is acceptable, bumping `minAppVersion` and the pinned `obsidian` typings together.
 
 ---
 

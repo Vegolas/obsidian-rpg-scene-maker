@@ -1,0 +1,68 @@
+# =============================================================================
+# TEMPLATE — do NOT leave this file here in the dedicated plugin repo.
+# Move it to  .github/workflows/release.yml  in the standalone Obsidian repo
+# (this monorepo builds via the .NET CI in .github/workflows/build.yml, so the
+# file is kept here only as a ready-to-carry template, with the .template
+# suffix so GitHub Actions never runs it from the monorepo).
+#
+# What it does: on pushing a version tag (e.g. 0.1.0), it builds the plugin and
+# publishes a GitHub release whose assets are main.js, manifest.json, styles.css
+# — exactly the three files Obsidian downloads when a user installs the plugin.
+#
+# Obsidian requirement: the git tag MUST equal manifest.json "version" EXACTLY,
+# with NO leading "v" (tag `0.1.0`, never `v0.1.0`). The `on.push.tags` filter
+# below only matches bare numeric N.N.N tags, so a stray v-prefixed tag won't
+# trigger a release.
+# =============================================================================
+
+name: Release Obsidian plugin
+
+on:
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify tag matches manifest version
+        run: |
+          tag="${GITHUB_REF#refs/tags/}"
+          manifest_version="$(node -p "require('./manifest.json').version")"
+          if [ "$tag" != "$manifest_version" ]; then
+            echo "::error::Tag ($tag) does not match manifest.json version ($manifest_version). Obsidian requires them to be identical (no 'v' prefix)."
+            exit 1
+          fi
+
+      # Creates a DRAFT release (Obsidian's canonical workflow does the same): review the
+      # auto-generated notes and confirm all three assets attached, then publish it. The plugin
+      # directory can only fetch assets from a PUBLISHED release, so remember to hit Publish
+      # before submitting / requesting re-review.
+      - name: Create draft release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="${GITHUB_REF#refs/tags/}"
+          gh release create "$tag" \
+            --title="$tag" \
+            --generate-notes \
+            --draft \
+            main.js manifest.json styles.css

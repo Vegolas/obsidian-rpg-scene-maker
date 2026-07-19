@@ -37,10 +37,10 @@ const LIST_PATH: Record<ListKind, string> = {
 const CACHE_TTL_MS = 15_000;
 
 /**
- * Thin client over the RPG Scene Maker HTTP API. Uses Obsidian's requestUrl so requests
+ * Thin client over the Ambient Director HTTP API. Uses Obsidian's requestUrl so requests
  * bypass CORS (the API sets no CORS headers) and work the same on desktop and mobile.
  */
-export class SceneMakerApi {
+export class AmbientDirectorApi {
   private cache: Partial<Record<ListKind, { at: number; items: Entity[] }>> = {};
 
   constructor(private getSettings: () => ApiSettings) {}
@@ -83,14 +83,17 @@ export class SceneMakerApi {
     try {
       const res = await requestUrl({ url: base + LIST_PATH[kind], method: "GET", headers: this.headers(), throw: false });
       if (res.status < 200 || res.status >= 300) return cached?.items ?? [];
-      const raw = res.json;
+      const raw: unknown = res.json;
       if (!Array.isArray(raw)) return cached?.items ?? [];
-      const items: Entity[] = raw.map((x) => ({
-        id: String(x.id ?? ""),
-        name: String(x.name ?? ""),
-        image: x.image ?? null,
-        category: x.category,
-      }));
+      const items: Entity[] = raw.map((entry) => {
+        const x = (entry ?? {}) as { id?: unknown; name?: unknown; image?: unknown; category?: unknown };
+        return {
+          id: String(x.id ?? ""),
+          name: String(x.name ?? ""),
+          image: typeof x.image === "string" ? x.image : null,
+          category: typeof x.category === "string" ? x.category : undefined,
+        };
+      });
       this.cache[kind] = { at: Date.now(), items };
       return items;
     } catch {

@@ -1,4 +1,4 @@
-import type SceneMakerPlugin from "./main";
+import type AmbientDirectorPlugin from "./main";
 import { ListKindOf, SmToken } from "./tokens";
 
 interface ChipReg {
@@ -20,7 +20,7 @@ export class StateTracker {
   private inFlight = false;
   private lastFetch = 0;
 
-  constructor(private plugin: SceneMakerPlugin) {}
+  constructor(private plugin: AmbientDirectorPlugin) {}
 
   /** Register a live chip. Only scene/event/sound have a meaningful active state. */
   register(token: SmToken, el: HTMLElement, apply: (active: boolean) => void): void {

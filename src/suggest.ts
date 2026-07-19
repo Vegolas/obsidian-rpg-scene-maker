@@ -7,7 +7,7 @@ import {
   EditorSuggestTriggerInfo,
   TFile,
 } from "obsidian";
-import type SceneMakerPlugin from "./main";
+import type AmbientDirectorPlugin from "./main";
 import { Entity } from "./api";
 import { DEFAULT_ICON, ListKindOf, SM_KINDS, SmKind, splitName } from "./tokens";
 
@@ -27,13 +27,13 @@ const ID_TRIGGER = /(?:^|[\s`([{])sm:(scene|event|sound|music|lights):([^\s`|]*)
 const KIND_TRIGGER = /(?:^|[\s`([{])sm:([a-z]*)$/;
 
 /** Autocomplete for the `sm:...` syntax: first the kind, then the matching scene/event/sound id. */
-export class SceneMakerSuggest extends EditorSuggest<Suggestion> {
+export class AmbientDirectorSuggest extends EditorSuggest<Suggestion> {
   private mode: "kind" | "entity" = "kind";
   private kind: SmKind = "scene";
 
   constructor(
     app: App,
-    private plugin: SceneMakerPlugin,
+    private plugin: AmbientDirectorPlugin,
   ) {
     super(app);
   }
