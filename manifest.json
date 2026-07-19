@@ -2,7 +2,7 @@
   "id": "rpg-scene-maker",
   "name": "RPG Scene Maker",
   "version": "0.1.0",
-  "minAppVersion": "1.4.0",
+  "minAppVersion": "1.5.7",
   "description": "Trigger RPG Scene Maker scenes, events and sounds from your notes with inline buttons.",
   "author": "Vegolas",
   "authorUrl": "https://github.com/Vegolas",
