@@ -1,6 +1,6 @@
 # Ambient Director — Obsidian plugin
 
-Fire [Ambient Director](../../README.md) scenes, events and sounds straight from your session
+Fire [Ambient Director](https://github.com/Vegolas/rpg-scene-maker) scenes, events and sounds straight from your session
 notes. Write an inline token and it renders as a clickable button — tap it while you read to
 switch the table's lights + music, without leaving the note.
 
