@@ -24,6 +24,36 @@ export const DEFAULT_SETTINGS: AmbientDirectorSettings = {
   highlightActive: true,
 };
 
+/*
+ * Minimal local typings for Obsidian 1.13+'s declarative settings API. The bundled
+ * obsidian typings are pinned to 1.5.7 (our minAppVersion) and don't declare these yet,
+ * so we model only the definition kinds this tab uses. A `control` row binds a settings
+ * key and Obsidian reads/writes/persists it for us; a `render` row hands us the Setting
+ * to wire up imperatively (used where we need a masked field or a plain button).
+ */
+type TextSettingKey = "baseUrl" | "apiKey";
+type ToggleSettingKey = "showThumbnails" | "highlightActive";
+type DropdownSettingKey = "render";
+
+type ControlDefinition =
+  | { type: "text"; key: TextSettingKey; placeholder?: string; defaultValue?: string }
+  | { type: "toggle"; key: ToggleSettingKey; defaultValue?: boolean }
+  | { type: "dropdown"; key: DropdownSettingKey; options: Record<string, string>; defaultValue?: RenderStyle };
+
+interface ControlSettingDefinition {
+  name: string;
+  desc?: string;
+  control: ControlDefinition;
+}
+
+interface RenderSettingDefinition {
+  name: string;
+  desc?: string;
+  render: (setting: Setting) => void;
+}
+
+type SettingDefinition = ControlSettingDefinition | RenderSettingDefinition;
+
 export class AmbientDirectorSettingTab extends PluginSettingTab {
   constructor(
     app: App,
@@ -32,84 +62,129 @@ export class AmbientDirectorSettingTab extends PluginSettingTab {
     super(app, plugin);
   }
 
+  /**
+   * Declarative settings for Obsidian 1.13+. Returning these makes every row show up in
+   * the global settings search; on 1.13+ Obsidian renders from here and skips display().
+   * `control` rows are auto-persisted by Obsidian; rows that need a masked input or a plain
+   * button use `render` to wire the control themselves.
+   */
+  getSettingDefinitions(): SettingDefinition[] {
+    return [
+      {
+        name: "Server address",
+        desc: "Base URL of the Ambient Director API on your LAN, e.g. http://192.168.1.20:5252",
+        control: { type: "text", key: "baseUrl", placeholder: "http://localhost:5252", defaultValue: DEFAULT_SETTINGS.baseUrl },
+      },
+      {
+        name: "API key",
+        desc: "Only needed if Security:ApiKey is set on the server. Stored in this vault's plugin data — never written into note text.",
+        render: (setting) => this.renderApiKey(setting),
+      },
+      {
+        name: "Button style",
+        desc: "Chip: a compact inline button. Banner: a full-width bar with the tile art as its background — best when the token sits on its own line. Reopen a note to apply.",
+        control: {
+          type: "dropdown",
+          key: "render",
+          options: { chip: "Chip (inline)", banner: "Banner (full width)" },
+          defaultValue: DEFAULT_SETTINGS.render,
+        },
+      },
+      {
+        name: "Show tile art",
+        desc: "Show an entity's uploaded art on its button — a thumbnail (chip) or the background (banner). Falls back to its emoji.",
+        control: { type: "toggle", key: "showThumbnails", defaultValue: DEFAULT_SETTINGS.showThumbnails },
+      },
+      {
+        name: "Highlight what's live",
+        desc: "Poll the server and mark a button while its scene/event/sound is currently active — even if it was started elsewhere.",
+        control: { type: "toggle", key: "highlightActive", defaultValue: DEFAULT_SETTINGS.highlightActive },
+      },
+      {
+        name: "Test connection",
+        desc: "Fetch the scene list from the server to confirm the address and key work.",
+        render: (setting) => this.renderTestButton(setting),
+      },
+    ];
+  }
+
+  /**
+   * Fallback for Obsidian < 1.13, which never calls getSettingDefinitions(). Renders the
+   * same definitions imperatively so the two paths can't drift.
+   */
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
 
-    new Setting(containerEl)
-      .setName("Server address")
-      .setDesc("Base URL of the Ambient Director API on your LAN, e.g. http://192.168.1.20:5252")
-      .addText((t) =>
-        t
-          .setPlaceholder("http://localhost:5252")
-          .setValue(this.plugin.settings.baseUrl)
-          .onChange(async (v) => {
-            this.plugin.settings.baseUrl = v.trim();
-            await this.plugin.saveSettings();
-          }),
-      );
+    for (const def of this.getSettingDefinitions()) {
+      const setting = new Setting(containerEl).setName(def.name);
+      if (def.desc) setting.setDesc(def.desc);
+      if ("render" in def) def.render(setting);
+      else this.applyControl(setting, def.control);
+    }
+  }
 
-    new Setting(containerEl)
-      .setName("API key")
-      .setDesc(
-        "Only needed if Security:ApiKey is set on the server. Stored in this vault's plugin data — never written into note text.",
-      )
-      .addText((t) => {
-        t.inputEl.type = "password";
-        t.setPlaceholder("(none)")
-          .setValue(this.plugin.settings.apiKey)
-          .onChange(async (v) => {
-            this.plugin.settings.apiKey = v.trim();
-            await this.plugin.saveSettings();
+  /** Wire an imperative control from a declarative descriptor — the pre-1.13 code path. */
+  private applyControl(setting: Setting, control: ControlDefinition): void {
+    const { plugin } = this;
+    switch (control.type) {
+      case "text": {
+        const { key, placeholder } = control;
+        setting.addText((t) => {
+          if (placeholder) t.setPlaceholder(placeholder);
+          t.setValue(plugin.settings[key]).onChange(async (v) => {
+            plugin.settings[key] = v;
+            await plugin.saveSettings();
           });
-      });
-
-    new Setting(containerEl)
-      .setName("Button style")
-      .setDesc(
-        "Chip: a compact inline button. Banner: a full-width bar with the tile art as its background — best when the token sits on its own line. Reopen a note to apply.",
-      )
-      .addDropdown((d) =>
-        d
-          .addOption("chip", "Chip (inline)")
-          .addOption("banner", "Banner (full width)")
-          .setValue(this.plugin.settings.render)
-          .onChange(async (v) => {
-            this.plugin.settings.render = v as "chip" | "banner";
-            await this.plugin.saveSettings();
+        });
+        break;
+      }
+      case "toggle": {
+        const { key } = control;
+        setting.addToggle((t) =>
+          t.setValue(plugin.settings[key]).onChange(async (v) => {
+            plugin.settings[key] = v;
+            await plugin.saveSettings();
           }),
-      );
+        );
+        break;
+      }
+      case "dropdown": {
+        const { key, options } = control;
+        setting.addDropdown((d) => {
+          for (const [value, label] of Object.entries(options)) d.addOption(value, label);
+          d.setValue(plugin.settings[key]).onChange(async (v) => {
+            plugin.settings[key] = v as RenderStyle;
+            await plugin.saveSettings();
+          });
+        });
+        break;
+      }
+    }
+  }
 
-    new Setting(containerEl)
-      .setName("Show tile art")
-      .setDesc("Show an entity's uploaded art on its button — a thumbnail (chip) or the background (banner). Falls back to its emoji.")
-      .addToggle((t) =>
-        t.setValue(this.plugin.settings.showThumbnails).onChange(async (v) => {
-          this.plugin.settings.showThumbnails = v;
-          await this.plugin.saveSettings();
-        }),
-      );
+  private renderApiKey(setting: Setting): void {
+    const { plugin } = this;
+    setting.addText((t) => {
+      t.inputEl.type = "password";
+      t.setPlaceholder("(none)")
+        .setValue(plugin.settings.apiKey)
+        .onChange(async (v) => {
+          plugin.settings.apiKey = v.trim();
+          await plugin.saveSettings();
+        });
+    });
+  }
 
-    new Setting(containerEl)
-      .setName("Highlight what's live")
-      .setDesc("Poll the server and mark a button while its scene/event/sound is currently active — even if it was started elsewhere.")
-      .addToggle((t) =>
-        t.setValue(this.plugin.settings.highlightActive).onChange(async (v) => {
-          this.plugin.settings.highlightActive = v;
-          await this.plugin.saveSettings();
-        }),
-      );
-
-    new Setting(containerEl)
-      .setName("Test connection")
-      .setDesc("Fetch the scene list from the server to confirm the address and key work.")
-      .addButton((b) =>
-        b.setButtonText("Test").onClick(async () => {
-          this.plugin.api.clearCache();
-          const scenes = await this.plugin.api.list("scene", true);
-          if (scenes.length > 0) new Notice(`Ambient Director: connected — ${scenes.length} scene(s) found.`);
-          else new Notice("Ambient Director: no scenes returned. Check the address/key and that the server is running.");
-        }),
-      );
+  private renderTestButton(setting: Setting): void {
+    const { plugin } = this;
+    setting.addButton((b) =>
+      b.setButtonText("Test").onClick(async () => {
+        plugin.api.clearCache();
+        const scenes = await plugin.api.list("scene", true);
+        if (scenes.length > 0) new Notice(`Ambient Director: connected — ${scenes.length} scene(s) found.`);
+        else new Notice("Ambient Director: no scenes returned. Check the address/key and that the server is running.");
+      }),
+    );
   }
 }
