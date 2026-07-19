@@ -1,6 +1,6 @@
 # RPG Scene Maker — Obsidian plugin
 
-Fire [RPG Scene Maker](../../README.md) scenes, events and sounds straight from your session
+Fire [RPG Scene Maker](https://github.com/Vegolas/rpg-scene-maker) scenes, events and sounds straight from your session
 notes. Write an inline token and it renders as a clickable button — tap it while you read to
 switch the table's lights + music, without leaving the note.
 
@@ -44,8 +44,9 @@ Without one, the button uses the entity's own name from the server.
 
 ## Install
 
-This plugin lives in the app repo but isn't in the Obsidian community store. Build it and drop it
-into your vault:
+Install from **Settings → Community plugins → Browse → RPG Scene Maker**.
+
+If you want, you can build it and drop it into your vault:
 
 ```bash
 cd integrations/obsidian
@@ -93,7 +94,7 @@ server has one set — it's remembered per device, just like on the iPad.
 It embeds the app in an `<iframe>`. This works great when the server runs on **this machine**
 (`http://localhost:5252`). A **remote LAN-IP http server** (e.g. `http://192.168.1.20:5252`) may be
 blocked by the browser's mixed-content policy — there, use **Open in browser**, or on the iPad run
-the panel as its [installed PWA](../../README.md#using-it-from-an-ipad-or-any-tabletphone).
+the panel as its [installed PWA](https://github.com/Vegolas/rpg-scene-maker#using-it-from-an-ipad-or-any-tabletphone).
 
 ## Notes
 
