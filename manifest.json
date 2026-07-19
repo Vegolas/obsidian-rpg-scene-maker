@@ -1,7 +1,7 @@
 {
   "id": "rpg-scene-maker",
   "name": "Ambient Director",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "minAppVersion": "1.5.7",
   "description": "Trigger Ambient Director scenes, events and sounds from your notes with inline buttons.",
   "author": "Vegolas",

@@ -1,6 +1,6 @@
 {
   "name": "ambient-director-obsidian",
-  "version": "0.1.0",
+  "version": "1.1.0",
   "description": "Trigger Ambient Director scenes/events/sounds from Obsidian notes.",
   "main": "main.js",
   "private": true,
